@@ -11,7 +11,8 @@
             List<string> stringIntsList = intsList.Select(x => x.ToString() + ", ").ToList(); //method syntax
 
             stringIntsList = (from ints in intsList
-                              select ints.ToString() + ", ").ToList(); //query syntax
+                              let newInts =  ints + ", "
+                              select newInts.ToString()).ToList(); //query syntax
 
             stringIntsList.ForEach(x => Console.Write(x));
 
@@ -120,19 +121,20 @@
                 new("Primus E. Wallet", agents[new Random().Next(agents.Count)])
             };
 
-            var clientsVsAgents = costumers.Join(costumers, x => x.Name, y => y.Name, (costumer, MyAgent) =>
+            var clientsVsAgents = costumers.Join(costumers, x => x.Name, y => y.Name, (costumer, agent) =>
                                                  new
                                                  {
-                                                     costumer = costumer.Name,
-                                                     MyAgent = costumer.MyAgent.Name
+                                                     Costumer = costumer.Name,
+                                                     Agent = costumer.MyAgent.Name
                                                  }); //method syntax
 
             clientsVsAgents = from costumer in costumers
-                              join agent in agents on costumer.MyAgent equals agent
+                              join agent in agents 
+                              on costumer.MyAgent equals agent
                               select new
                               {
-                                  costumer = costumer.Name,
-                                  MyAgent = costumer.MyAgent.Name
+                                  Costumer = costumer.Name,
+                                  Agent = costumer.MyAgent.Name
                               }; //query syntax
 
 
@@ -146,14 +148,19 @@
             var clientsVsOrders = costumers.GroupJoin(costumers, x => x.Name, y => y.Name, (costumer, MyOrders) => 
                                   new 
                                   { 
-                                      costumer = costumer.Name, 
-                                      MyOrders = costumer.MyOrders.Count 
+                                      Costumer = costumer.Name, 
+                                      Orders = costumer.MyOrders.Count 
                                   }); //method syntax
 
             var clientsVsOrders2 = from costumer in costumers
-                                   join orders in costumers on costumer.MyOrders.Count equals orders.MyOrders.Count
+                                   join orders in costumers 
+                                   on costumer.MyOrders.Count equals orders.MyOrders.Count
                                    group orders by costumer into g
-                                   select new { g.Key.Name, MyOrders = g.Key.MyOrders.Count };// query syntax
+                                   select new 
+                                   {
+                                       Costumer = g.Key.Name, 
+                                       Orders = g.Key.MyOrders.Count 
+                                   };// query syntax
 
             foreach (var client in clientsVsOrders2)
             {
@@ -172,11 +179,18 @@
                 Console.WriteLine();
             }
 
-            var moreThenTwoOrders_500Worth = from cost in costumers
-                                             where cost.MyOrdersAvarage > 500 && cost.MyOrders.Count > 2
-                                             from order in cost.MyOrders
-                                             group order by cost.Name into g
-                                             select new { name = g.Key }; // query syntax
+            var moreThenTwoOrders_500Worth = from costumer in costumers
+                                             where costumer.OrdersAvarage > 500 && costumer.MyOrders.Count > 2
+                                             join orders in costumers
+                                             on costumer.MyOrders.Count equals orders.MyOrders.Count
+                                             group orders by costumer into g
+                                             select new
+                                             {
+                                                 Costumer = g.Key.Name,
+                                                 Orders = g.Key.MyOrders.Count,
+                                                 Average = g.Key.OrdersAvarage + "$"
+                                                 
+                                             };// query syntax
 
             Console.WriteLine("costumers with more then 2 orders 500$ worth:\n");
 

@@ -3,11 +3,10 @@
     public class Agent
     {
         public string Name { get; set; }
-
+        //ctor
         public Agent(string name)
         {
             Name = name;
         }
     }
-
 }
